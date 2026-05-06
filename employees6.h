@@ -5,17 +5,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Colors (from Lab 4 style) */
+
 #define B  "\x1b[38;2;135;206;250m"
 #define G  "\x1b[38;2;152;251;152m"
 #define RO "\x1b[38;2;255;107;107m"
 #define RE "\x1b[0m"
 
-/* Enums for education and speciality (Lab 4) */
+// Enums
 typedef enum { BACH = 1, MASTER, DOCT } Education;
 typedef enum { IT = 1, ACC, CONSTRUCT, HRSPEC, MANAGER } Speciality;
 
-/* Date and Employee CDT (based on Lab 4) */
+// Date
 typedef struct {
     int day, month, year;
 } Date;
@@ -31,14 +31,14 @@ typedef struct {
     char status[20];
 } Employee;
 
-/* Doubly linked list node (used by both stack and queue) */
+// Double Link List for stack and queue
 typedef struct Node {
     Employee data;
     struct Node *next;
     struct Node *prev;
 } Node;
 
-/* Helpers from Lab 4 style */
+// Helpers
 static inline const char* educationStr(Education edu) {
     switch (edu) {
         case BACH:   return "Bachelors Degree";
@@ -75,8 +75,8 @@ static inline void printSpecMenu(void) {
     printf(" 5. Manager\n");
 }
 
-/* Input / print / node creation used by both versions (like inputTrainData) */
 
+// Inputs used by both versions
 static inline Employee inputEmployee(void) {
     Employee e;
     int ed, sp;
@@ -136,4 +136,4 @@ static inline Node* createNode(Employee e) {
     return newNode;
 }
 
-#endif /* EMPLOYEES6_H */
+#endif
