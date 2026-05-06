@@ -102,7 +102,42 @@ static void searchQueueById(Node *front, int id) {
 
     printf("Employee ID %d not found in Queue.\n", id);
 }
+static void saveQueueToFile(Node *front, const char *filename) {
+    FILE *file;
+    if (strstr(filename, ".txt")) {
+        file = fopen(filename, "w");
+        if (!file) {
+            printf("Could not open text file.\n");
+            return;
+        }
+        Node *current = front;
+        while (current != NULL) {
+            Employee e = current->data;
+            fprintf(file, "%d|%s|%s|%d|%d|%.2f|%d|%d|%d|%s\n",
+                    e.id, e.name, e.surname,
+                    e.education, e.speciality, e.salary,
+                    e.startDate.day, e.startDate.month, e.startDate.year,
+                    e.status);
+            current = current->next;
+        }
+    } else {
+        file = fopen(filename, "wb");
+        if (!file) {
+            printf("Could not open binary file.\n");
+            return;
+        }
+        Node *current = front;
+        while (current != NULL) {
+            fwrite(&current->data, sizeof(Employee), 1, file);
+            current = current->next;
+        }
+    }
 
+    if (file) {
+        fclose(file);
+        printf("Queue successfully saved to %s.\n", filename);
+    }
+}
 
 // Second main
 int main(void) {
@@ -112,12 +147,13 @@ int main(void) {
     char filename[256];
 
     while (1) {
-        printf("\n" B "=== QUEUE MENU ===\n" RE);
+        printf("\n" B "--- QUEUE MENU ---\n" RE);
         printf("1. Simple Enqueue\n");
         printf("2. Priority Enqueue (Highest Salary First)\n");
         printf("3. Dequeue\n");
         printf("4. Display Queue\n");
         printf("5. Search Queue\n");
+        printf("6. Save to File\n");
         printf("0. Exit\n");
         printf("Choice: ");
         if (scanf("%d", &choice) != 1) return 0;
@@ -144,6 +180,12 @@ int main(void) {
                 searchQueueById(queueFront, id);
                 break;
             }
+            case 6:
+                printf("Enter filename (e.g., queue.txt or queue.bin): ");
+                scanf("%255s", filename);
+                getchar();
+                saveQueueToFile(queueFront, filename);
+                break;
             case 0:
                 return 0;
             default:
