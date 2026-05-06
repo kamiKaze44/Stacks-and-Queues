@@ -1,8 +1,8 @@
 #include "employees6.h"
 #include <string.h>
 
-/* ----- STACK OPERATIONS (Top = head of list) ----- */
 
+// Stack Operations
 static void push(Node **top, Employee e) {
     Node *newNode = createNode(e);
 
@@ -61,7 +61,43 @@ static void searchStackById(Node *top, int id) {
     printf("Employee ID %d not found in Stack.\n", id);
 }
 
+// Saving to binary or txt file
+static void saveStackToFile(Node *top, const char *filename) {
+    FILE *file;
+    if (strstr(filename, ".txt")) {
+        file = fopen(filename, "w");
+        if (!file) {
+            printf("Could not open text file.\n");
+            return;
+        }
+        Node *current = top;
+        while (current != NULL) {
+            Employee e = current->data;
+            fprintf(file, "%d|%s|%s|%d|%d|%.2f|%d|%d|%d|%s\n",
+                    e.id, e.name, e.surname,
+                    e.education, e.speciality, e.salary,
+                    e.startDate.day, e.startDate.month, e.startDate.year,
+                    e.status);
+            current = current->next;
+        }
+    } else {
+        file = fopen(filename, "wb");
+        if (!file) {
+            printf("Could not open binary file.\n");
+            return;
+        }
+        Node *current = top;
+        while (current != NULL) {
+            fwrite(&current->data, sizeof(Employee), 1, file);
+            current = current->next;
+        }
+    }
 
+    if (file) {
+        fclose(file);
+        printf("Stack successfully saved to %s.\n", filename);
+    }
+}
 
 
 // First main
@@ -76,6 +112,7 @@ int main(void) {
         printf("2. Pop Employee\n");
         printf("3. Display Stack\n");
         printf("4. Search Stack\n");
+        printf("5. Save to File\n");
         printf("0. Exit\n");
         printf("Choice: ");
         if (scanf("%d", &choice) != 1) return 0;
@@ -99,6 +136,12 @@ int main(void) {
                 searchStackById(stackTop, id);
                 break;
             }
+            case 5:
+                printf("Enter filename (e.g., stack.txt or stack.bin): ");
+                scanf("%255s", filename);
+                getchar();
+                saveStackToFile(stackTop, filename);
+                break;
             case 0:
                 return 0;
             default:
