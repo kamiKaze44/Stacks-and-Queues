@@ -53,13 +53,15 @@ static void priorityEnqueue(Node **front, Node **rear, Employee e) {
     printf("Employee %d priority enqueued.\n", e.id);
 }
 
-static void dequeue(Node **front, Node **rear) {
+static void dequeueFront(Node **front, Node **rear) {
+
     if (*front == NULL) {
-        printf("Queue Underflow! Nothing to dequeue.\n");
+        printf("Queue Underflow!\n");
         return;
     }
 
     Node *temp = *front;
+
     *front = (*front)->next;
 
     if (*front == NULL)
@@ -67,10 +69,50 @@ static void dequeue(Node **front, Node **rear) {
     else
         (*front)->prev = NULL;
 
-    printf("Employee %d dequeued.\n", temp->data.id);
+    printf("Employee %d dequeued from front.\n",
+           temp->data.id);
+
     free(temp);
 }
+static void enqueueFront(Node **front,
+                         Node **rear,
+                         Employee e) {
 
+    Node *newNode = createNode(e);
+
+    if (*front == NULL) {
+        *front = *rear = newNode;
+    } else {
+        newNode->next = *front;
+        (*front)->prev = newNode;
+        *front = newNode;
+    }
+
+    printf("Employee %d inserted at front.\n",
+           e.id);
+}
+static void dequeueRear(Node **front,
+                        Node **rear) {
+
+    if (*rear == NULL) {
+        printf("Queue Underflow!\n");
+        return;
+    }
+
+    Node *temp = *rear;
+
+    *rear = (*rear)->prev;
+
+    if (*rear == NULL)
+        *front = NULL;
+    else
+        (*rear)->next = NULL;
+
+    printf("Employee %d removed from rear.\n",
+           temp->data.id);
+
+    free(temp);
+}
 static void displayQueue(Node *front) {
     if (front == NULL) {
         printf("Queue is empty.\n");
@@ -138,7 +180,38 @@ static void saveQueueToFile(Node *front, const char *filename) {
         printf("Queue successfully saved to %s.\n", filename);
     }
 }
+static void loadQueueFromFile(Node **front, Node **rear,
+                              const char *filename) {
 
+    FILE *file = fopen(filename, "r");
+
+    if (!file) {
+        printf("Could not open file.\n");
+        return;
+    }
+
+    Employee e;
+
+    while (fscanf(file,
+           "%d|%49[^|]|%49[^|]|%d|%d|%f|%d|%d|%d|%19[^\n]\n",
+           &e.id,
+           e.name,
+           e.surname,
+           &e.education,
+           &e.speciality,
+           &e.salary,
+           &e.startDate.day,
+           &e.startDate.month,
+           &e.startDate.year,
+           e.status) == 10) {
+
+        enqueue(front, rear, e);
+    }
+
+    fclose(file);
+
+    printf("Queue loaded from %s.\n", filename);
+}
 // Second main
 int main(void) {
     Node *queueFront = NULL;
@@ -151,9 +224,11 @@ int main(void) {
         printf("1. Simple Enqueue\n");
         printf("2. Priority Enqueue (Highest Salary First)\n");
         printf("3. Dequeue\n");
-        printf("4. Display Queue\n");
-        printf("5. Search Queue\n");
-        printf("6. Save to File\n");
+        printf("4. Enqueue Front (Deque)\n");
+        printf("5. Dequeue Rear (Deque)\n");
+        printf("6. Display Queue\n");
+        printf("8. Save to File\n");
+        printf("9. Load from File\n");
         printf("0. Exit\n");
         printf("Choice: ");
         if (scanf("%d", &choice) != 1) return 0;
@@ -161,18 +236,32 @@ int main(void) {
 
         switch (choice) {
             case 1:
-                enqueue(&queueFront, &queueRear, inputEmployee());
+                enqueue(&queueFront,
+                        &queueRear,
+                        inputEmployee());
                 break;
             case 2:
-                priorityEnqueue(&queueFront, &queueRear, inputEmployee());
+                priorityEnqueue(&queueFront,
+                                &queueRear,
+                                inputEmployee());
                 break;
             case 3:
-                dequeue(&queueFront, &queueRear);
+                dequeueFront(&queueFront,
+                             &queueRear);
                 break;
             case 4:
+                enqueueFront(&queueFront,
+                             &queueRear,
+                             inputEmployee());
+                break;
+            case 5:
+                dequeueRear(&queueFront,
+                             &queueRear);
+                break;
+            case 6:
                 displayQueue(queueFront);
                 break;
-            case 5: {
+            case 7: {
                 int id;
                 printf("Enter Employee ID: ");
                 scanf("%d", &id);
@@ -180,14 +269,25 @@ int main(void) {
                 searchQueueById(queueFront, id);
                 break;
             }
-            case 6:
-                printf("Enter filename (e.g., queue.txt or queue.bin): ");
+            case 8:
+                printf("Enter filename: ");
                 scanf("%255s", filename);
                 getchar();
-                saveQueueToFile(queueFront, filename);
+                saveQueueToFile(queueFront,
+                                filename);
+                break;
+            case 9:
+                printf("Enter filename: ");
+                scanf("%255s", filename);
+                getchar();
+                loadQueueFromFile(&queueFront,
+                                  &queueRear,
+                                  filename);
+
                 break;
             case 0:
                 return 0;
+
             default:
                 printf("Invalid choice.\n");
         }

@@ -65,7 +65,7 @@ static void searchStackById(Node *top, int id) {
 static void saveStackToFile(Node *top, const char *filename) {
     FILE *file;
     if (strstr(filename, ".txt")) {
-        file = fopen(filename, "w");
+        file = fopen(filename, "a");
         if (!file) {
             printf("Could not open text file.\n");
             return;
@@ -81,7 +81,7 @@ static void saveStackToFile(Node *top, const char *filename) {
             current = current->next;
         }
     } else {
-        file = fopen(filename, "wb");
+        file = fopen(filename, "ab");
         if (!file) {
             printf("Could not open binary file.\n");
             return;
@@ -99,6 +99,37 @@ static void saveStackToFile(Node *top, const char *filename) {
     }
 }
 
+static void loadStackFromFile(Node **top, const char *filename) {
+
+    FILE *file = fopen(filename, "r");
+
+    if (!file) {
+        printf("Could not open file.\n");
+        return;
+    }
+
+    Employee e;
+
+    while (fscanf(file,
+           "%d|%49[^|]|%49[^|]|%d|%d|%f|%d|%d|%d|%19[^\n]\n",
+           &e.id,
+           e.name,
+           e.surname,
+           &e.education,
+           &e.speciality,
+           &e.salary,
+           &e.startDate.day,
+           &e.startDate.month,
+           &e.startDate.year,
+           e.status) == 10) {
+
+        push(top, e);
+    }
+
+    fclose(file);
+
+    printf("Stack loaded from %s.\n", filename);
+}
 
 // First main
 int main(void) {
@@ -107,12 +138,13 @@ int main(void) {
     char filename[256];
 
     while (1) {
-        printf("\n" B "   STACK MENU   \n" RE);
+        printf("\n" B "--- STACK MENU ---\n" RE);
         printf("1. Push Employee\n");
         printf("2. Pop Employee\n");
         printf("3. Display Stack\n");
         printf("4. Search Stack\n");
         printf("5. Save to File\n");
+        printf("6. Load from File\n");
         printf("0. Exit\n");
         printf("Choice: ");
         if (scanf("%d", &choice) != 1) return 0;
@@ -141,6 +173,12 @@ int main(void) {
                 scanf("%255s", filename);
                 getchar();
                 saveStackToFile(stackTop, filename);
+                break;
+            case 6:
+                printf("Enter filename: ");
+                scanf("%255s", filename);
+                getchar();
+                loadStackFromFile(&stackTop, filename);
                 break;
             case 0:
                 return 0;
